@@ -1,1 +1,87 @@
+var request = require('ajax-request');
 
+//File Opening
+var fs = require('fs');
+
+function Update() {
+
+	request('url', function(err, res, body) {});
+
+	request({
+		url:'https://api.fortnitetracker.com/v1/profile/pc/Ranner198',
+		method: 'GET',
+		data: {
+	    key: "Wins"
+	 },
+	 	headers: {"TRN-Api-Key": "2d4d442a-937a-4e08-987e-205536a23cde"},
+
+	}, function(err, res, body) {
+	  	
+	  	var data = JSON.parse(body);
+
+	  	 var array = [];
+	  	 var placeholder = "";
+	  	 var fixedInfo = "";
+
+	  	 var d = new Date();
+	  	 var year = d.getFullYear();
+	  	 var month = '' + (d.getMonth() + 1);
+	  	 var day = '' + d.getDate();
+
+	  	if (month.length < 2)
+	  		month = '0' + month;
+	    if (day.length < 2)
+	    	day = '0' + day;
+
+	  	 var today = year + "-" + month + "-" + day;
+
+	  	 for (var i = 0; i < data.recentMatches.length; i++) {
+	  	 	placeholder = "";
+	  	 	for (var j = 0; j < 10; j++) {
+	  	 		placeholder += (data.recentMatches[i].dateCollected[j]).toString();
+	  	 	}	
+	  	 	array[i] = placeholder;
+	  	 }
+	  	 for (var a = 0; a < array.length; a++) {
+	  	 	fixedInfo = array.join(",");
+	  	 }
+
+	  	 var indexs = [];
+
+	  	 for (var x = 0; x < array.length; x++) {
+	  	 	if (array[x] == today)
+	  	 	{
+	  	 		indexs.push(x);  	 		
+	  	 	}
+	  	 }
+
+		var totalKillsToday = 0;
+		var winsToday = 0;
+
+		for (var total = 0; total < indexs.length; total++) {
+			totalKillsToday += data.recentMatches[indexs[total]].kills;
+			winsToday += data.recentMatches[indexs[total]].top1;
+		}
+
+		var output = "Kills Today: " + totalKillsToday.toString() + " \r\nWins Today: " + winsToday.toString();
+
+		fs.writeFile('FN.txt', output, function (err) {
+			if (err)
+			{
+				console.log(err);
+			}
+			else
+			{
+				console.log("Text Pushed()");
+			}
+
+		});
+
+	});
+
+	console.log("I ran");
+}
+
+Update();
+
+setInterval(Update, 120000);
